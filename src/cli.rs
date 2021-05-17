@@ -41,6 +41,7 @@ pub struct Cli {
 pub enum SubCommand {
     New(HandleNew),
     Edit(HandleEdit),
+    List(HandleList),
 }
 
 /// Create a new note and edit it in your default editor
@@ -62,3 +63,7 @@ pub struct HandleEdit {
     #[clap()]
     pub name: String,
 }
+
+/// List all notes that exist for the given date
+#[derive(Clap)]
+pub struct HandleList {}

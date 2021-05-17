@@ -1,10 +1,14 @@
 pub mod cli;
 pub mod logging;
-use std::{fs::File, io::Write, path::PathBuf};
+use std::{ffi::OsString, fs::File, io::Write, path::PathBuf};
 
 use chrono::{Date, Local};
 
-pub fn make_file_path(base_dir: PathBuf, date: Date<Local>, name: &str) -> Result<PathBuf, std::io::Error> {
+pub fn make_file_path(
+    base_dir: PathBuf,
+    date: Date<Local>,
+    name: &str,
+) -> Result<PathBuf, std::io::Error> {
     let file_dir = base_dir.join(date.format("%Y-%m-%d").to_string());
 
     std::fs::create_dir_all(&file_dir)?;
@@ -27,4 +31,16 @@ pub fn edit(file_path: PathBuf) -> Result<(), std::io::Error> {
     file_path.metadata()?; // Ensure that file exists
     edit::edit_file(file_path)?;
     Ok(())
+}
+
+pub fn list(base_dir: PathBuf, date: Date<Local>) -> Result<Vec<OsString>, std::io::Error> {
+    let file_dir = base_dir.join(date.format("%Y-%m-%d").to_string());
+    let file_paths: Result<Vec<_>, std::io::Error> = std::fs::read_dir(file_dir)?
+        .map(|res| res.map(|e| e.path().into_os_string()))
+        .collect();
+    let file_paths: Vec<_> = file_paths?
+        .into_iter()
+        .filter(|filename| filename.to_string_lossy().ends_with(".md"))
+        .collect();
+    Ok(file_paths)
 }
